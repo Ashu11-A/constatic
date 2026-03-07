@@ -1,7 +1,7 @@
 {
 	"extends": "@constatic/base/tsconfig",
 	"compilerOptions": {
-
+		"types": ["node"],
 		// Output Options
 		"outDir": "./build",
 		"rootDir": "./src",

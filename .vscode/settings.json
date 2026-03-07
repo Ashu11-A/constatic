@@ -11,4 +11,7 @@
         "source.removeUnusedImports": "explicit",
         "source.addMissingImports.ts": "explicit"
     },
+    "npmx.diagnostics.vulnerability": false,
+    "npmx.diagnostics.replacement": false,
+    "npmx.diagnostics.distTag": false,
 }

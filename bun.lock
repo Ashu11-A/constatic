@@ -52,7 +52,7 @@
     },
     "packages/base": {
       "name": "@constatic/base",
-      "version": "0.0.4",
+      "version": "0.0.5",
       "dependencies": {
         "rou3": "^0.7.12",
         "tinyglobby": "^0.2.15",
