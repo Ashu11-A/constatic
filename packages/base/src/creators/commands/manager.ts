@@ -274,29 +274,35 @@ export class CommandManager extends BaseManager {
 
         const logs: [size: number, location: string][] = [];
 
-        const setGlobal = (commands: BuildedCommandData[]) => {
-            promises.push(manager.set(commands).then(
-                data => logs.push([
-                    data.size, `${client.user.username} application`,
-                ])
-            ))
+        const setGlobal = async (commands: BuildedCommandData[]) => {
+            const data = await manager.set(commands);
+            logs.push([data.size, `${client.user.username} application`]);
         }
 
-        if (guildList.size >= 1) {
-            const guildCommands = commands.filter(c => !c.global);
-            for (const id of guildList.values()) {
-                promises.push(manager.set(guildCommands, id)
-                    .then(commands => logs.push([
-                        commands.size, `${id} guild`
+        if (guildList.size) {
+            const guildScopedCommands: BuildedCommandData[] = [];
+            const globalCommands: BuildedCommandData[] = [];
+
+            for(const command of commands){
+                if (command.global){
+                    globalCommands.push(command)
+                } else {
+                    guildScopedCommands.push(command);
+                }
+            }
+
+            for (const id of guildList) {
+                promises.push(manager.set(guildScopedCommands, id)
+                    .then(registerdCommands => logs.push([
+                        registerdCommands.size, `${id} guild`
                     ]))
                 );
             }
-            const globalCommands = commands.filter(c => c.global);
-            if (globalCommands.length >= 1){
-                setGlobal(globalCommands);
+            if (globalCommands.length){
+                promises.push(setGlobal(globalCommands));
             }
         } else {
-            setGlobal(commands);
+            promises.push(setGlobal(commands));
         }
 
         await Promise.all(promises);
