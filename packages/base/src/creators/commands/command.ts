@@ -1,10 +1,10 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, AutocompleteInteraction, ChatInputCommandInteraction, InteractionContextType, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, type ApplicationCommandOptionAllowedChannelTypes, type ApplicationCommandOptionChoiceData, type BaseApplicationCommandData, type CacheType, type LocalizationMap } from "discord.js";
 import type { NotEmptyArray, UniqueArray } from "../../utils/types.js";
 
-export type CommandType = Exclude<
-    ApplicationCommandType,
-    ApplicationCommandType.PrimaryEntryPoint
->;
+export type CommandType = 
+    | ApplicationCommandType.ChatInput
+    | ApplicationCommandType.Message
+    | ApplicationCommandType.User;
 
 type AutocompleData<Type> = Promise<
     | readonly ApplicationCommandOptionChoiceData<
