@@ -303,6 +303,10 @@ export class CommandManager extends BaseManager {
             }
         } else {
             promises.push(setGlobal(commands));
+
+            client.guilds.cache.forEach(
+                guild => guild.commands.set([]).catch(() => null)
+            );
         }
 
         await Promise.all(promises);
