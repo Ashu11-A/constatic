@@ -45,6 +45,7 @@
     },
     "packages/@template": {
       "name": "@constatic/template",
+      "version": "1.0.0",
       "devDependencies": {
         "@constatic/config": "*",
         "typescript": "^5.9.3",
@@ -68,7 +69,7 @@
     },
     "tools/cli": {
       "name": "constatic",
-      "version": "1.5.5",
+      "version": "1.5.6",
       "bin": {
         "constatic": "build/index.js",
       },
