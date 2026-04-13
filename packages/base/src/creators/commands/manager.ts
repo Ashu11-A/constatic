@@ -298,9 +298,7 @@ export class CommandManager extends BaseManager {
                     ]))
                 );
             }
-            if (globalCommands.length){
-                promises.push(setGlobal(globalCommands));
-            }
+            promises.push(setGlobal(globalCommands));
         } else {
             promises.push(setGlobal(commands));
 
