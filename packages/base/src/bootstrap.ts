@@ -1,8 +1,9 @@
 import { type Client } from "discord.js";
-import { ConstaticApp, type BaseErrorHandler } from "./app.js";
+import { ConstaticApp } from "./app.js";
 import { createClient, type CustomClientOptions } from "./client.js";
 import { ConstaticError } from "./error.js";
 import { loadModules } from "./modules.js";
+import type { BaseErrorHandler } from "./types/instance.js";
 
 export interface BootstrapOptions extends CustomClientOptions {
     /**

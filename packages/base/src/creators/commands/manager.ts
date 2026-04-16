@@ -1,16 +1,11 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, AutocompleteInteraction, Client, CommandInteraction, InteractionContextType, type ApplicationCommandOptionData, type ApplicationCommandSubCommandData, type ApplicationCommandSubGroupData, type ChatInputApplicationCommandData, type MessageApplicationCommandData, type UserApplicationCommandData } from "discord.js";
+import { ApplicationCommandOptionType, ApplicationCommandType, AutocompleteInteraction, Client, CommandInteraction, InteractionContextType, type ApplicationCommandOptionData, type ApplicationCommandSubCommandData, type ApplicationCommandSubGroupData } from "discord.js";
 import { format, styleText } from "node:util";
 import { RunBlockError } from "../../error.js";
+import type { BuildedCommandData, CommandModule, CommandType, SlashCommandOptionData } from "../../types/command.js";
 import { BaseManager } from "../manager.js";
-import type { Command, CommandModule, CommandType, SlashCommandOptionData } from "./command.js";
+import type { Command } from "./command.js";
 
 type Runner = Function | null | undefined;
-
-type BuildedCommandData = (
-    | UserApplicationCommandData
-    | MessageApplicationCommandData
-    | ChatInputApplicationCommandData
-) & { global?: boolean };
 
 export class CommandManager extends BaseManager {
     private get config() {

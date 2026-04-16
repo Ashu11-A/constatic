@@ -1,6 +1,7 @@
 import { Client, Collection, type ClientEvents } from "discord.js";
+import type { ClientEventKey, EventPropData, EventsCollection, GenericEventArgs } from "../../types/event.js";
 import { BaseManager } from "../manager.js";
-import type { ClientEventKey, Event, EventPropData, EventsCollection, GenericEventArgs } from "./event.js";
+import type { Event } from "./event.js";
 
 export class EventManager extends BaseManager {
     private get config(){

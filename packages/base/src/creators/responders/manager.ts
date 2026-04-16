@@ -1,14 +1,7 @@
-import type { CacheType, MessageComponentInteraction, ModalSubmitInteraction } from "discord.js";
 import { styleText } from "node:util";
 import { Router } from "../../utils/router.js";
 import { BaseManager } from "../manager.js";
-import { ResponderType, type Responder } from "./responder.js";
-
-export type GenericResponder = Responder<string, readonly ResponderType[], any, CacheType>;
-
-export type GenericResponderInteraction = 
-    | MessageComponentInteraction
-    | ModalSubmitInteraction;
+import { ResponderType, type GenericResponder, type GenericResponderInteraction } from "../../types/responder.js";
 
 export class ResponderManager extends BaseManager {
     private get config(){
