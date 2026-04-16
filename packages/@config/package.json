@@ -11,5 +11,8 @@
     "./tsconfig": {
       "default": "./base.json"
     }
+  },
+  "dependencies": {
+    "dts-bundle-generator": "^9.5.1"
   }
 }
