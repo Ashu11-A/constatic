@@ -1,13 +1,14 @@
 import { styleText } from "node:util";
-import { Router } from "../../utils/router.js";
+import { Node, Reminist } from "reminist";
+import { responderKeys, ResponderType, type GenericResponder, type GenericResponderInteraction } from "../../types/responder.js";
 import { BaseManager } from "../manager.js";
-import { ResponderType, type GenericResponder, type GenericResponderInteraction } from "../../types/responder.js";
+import { Analyze } from "url-ast";
 
 export class ResponderManager extends BaseManager {
     private get config(){
         return this.app.config.responders
     }
-    private readonly router = new Router<GenericResponder>();
+    private readonly router = new Reminist({ keys: responderKeys });
     public set(responder: GenericResponder) {
         const path = responder.data.customId;
         for (const type of new Set(responder.data.types)) {
@@ -22,7 +23,7 @@ export class ResponderManager extends BaseManager {
 
     }
     public getHandler(type: ResponderType, customId: string) {
-        return this.router.find(type, customId);
+        return this.router.find(type, customId) as { node: Node<GenericResponder, string, true>, params: Record<string, string> };
     }
     private getType(interaction: GenericResponderInteraction) {
         return interaction.isButton() ? ResponderType.Button :
@@ -48,11 +49,15 @@ export class ResponderManager extends BaseManager {
             onNotFound?.(interaction);
             return;
         }
-        const data = handler.data.data;
-
-        const params = handler.params && data.parse
-            ? data.parse(handler.params)
-            : (handler.params ?? {});
+        const responder = handler.node.store.data;
+        const parser = handler.node.store.ast
+        const parsed = new Analyze(interaction.customId, parser)
+        
+        const params = {
+          ...parsed.getFragment(),
+          ...parsed.getSearchParams(),
+          ...parsed.getParams()
+        }
 
         let isBlock = false;
         const block = () => isBlock = true;
@@ -60,7 +65,7 @@ export class ResponderManager extends BaseManager {
         if (isBlock) return;
 
         //@ts-ignore
-        await data.run(interaction, params)
+        await responder.run(interaction, params)
             .catch(err => {
                 if (onError) {
                     onError(err, interaction, params);

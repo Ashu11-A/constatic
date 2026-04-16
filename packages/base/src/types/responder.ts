@@ -1,9 +1,9 @@
 import type { ButtonInteraction, CacheType, ChannelSelectMenuInteraction, MentionableSelectMenuInteraction, MessageComponentInteraction, ModalMessageModalSubmitInteraction, ModalSubmitInteraction, RoleSelectMenuInteraction, StringSelectMenuInteraction, UserSelectMenuInteraction } from "discord.js";
-import { type InferRouteParams } from "rou3";
+import { type ParsePath } from 'url-ast';
 import type { Responder } from "../creators/index.js";
-import type { NotEmptyArray, Prettify, UniqueArray } from "./utils.js";
+import type { NotEmptyArray, UniqueArray } from "./utils.js";
 
-export type GenericResponder = Responder<string, readonly ResponderType[], any, CacheType>;
+export type GenericResponder = Responder<string, readonly ResponderType[], CacheType>;
 
 export type GenericResponderInteraction = 
     | MessageComponentInteraction
@@ -20,6 +20,9 @@ export enum ResponderType {
     ModalComponent = "modal.component",
 }
 
+export type ResponderTypeKeysArray = Array<`${ResponderType}`>
+export const responderKeys = Object.keys(ResponderType) as ResponderTypeKeysArray;
+
 export type ResponderInteraction<Type extends ResponderType, Cache extends CacheType> = {
     [ResponderType.Button]: ButtonInteraction<Cache>,
     [ResponderType.StringSelect]: StringSelectMenuInteraction<Cache>,
@@ -31,25 +34,17 @@ export type ResponderInteraction<Type extends ResponderType, Cache extends Cache
     [ResponderType.ModalComponent]: ModalMessageModalSubmitInteraction<Cache>,
 }[Type];
 
-type ResolveParams<Path extends string, Parsed> = Prettify<
-    Parsed extends { [x: string | number | symbol]: any }
-        ? Parsed
-        : InferRouteParams<Path>
->;
-
 export interface ResponderData<
     Path extends string,
     Types extends readonly ResponderType[],
-    out Parsed,
     Cache extends CacheType,
 > {
     customId: Path,
     types: NotEmptyArray<UniqueArray<Types>>,
     cache?: Cache;
-    parse?(this: void, params: InferRouteParams<Path>): Parsed;
     run(
         this: void,
         interaction: ResponderInteraction<Types[number], Cache>,
-        params: ResolveParams<Path, Parsed>
+        params: ParsePath<Path>['fragment'] & ParsePath<Path>['params'] & ParsePath<Path>['searchParams']
     ): Promise<void>;
 }
