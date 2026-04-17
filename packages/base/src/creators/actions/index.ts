@@ -1,3 +1,4 @@
+export { BaseAction } from "./base.js";
 export { Button, type GenericButton } from "./Button.js";
 export { StringSelect, type GenericStringSelect } from "./StringSelect.js";
 export { UserSelect, type GenericUserSelect } from "./UserSelect.js";
