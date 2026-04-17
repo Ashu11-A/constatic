@@ -10,7 +10,7 @@ export class ResponderManager extends BaseManager {
     }
     private readonly router = new Reminist({ keys: responderKeys });
     public set(responder: GenericResponder) {
-        const path = responder.data.customId;
+      const path = responder.ast.getPathname()
         for (const type of new Set(responder.data.types)) {
             this.router.add(type, path, responder);
             this.logs.push([
@@ -45,10 +45,11 @@ export class ResponderManager extends BaseManager {
         }
 
         const handler = this.getHandler(responderType, interaction.customId)
-        if (!handler) {
+        if (!handler?.node) {
             onNotFound?.(interaction);
             return;
         }
+
         const responder = handler.node.store.data;
         const parser = handler.node.store.ast
         const parsed = new Analyze(interaction.customId, parser)

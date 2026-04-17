@@ -1,11 +1,11 @@
-import { ApplicationCommandOptionType, ApplicationCommandType, AutocompleteInteraction, ChatInputCommandInteraction, InteractionContextType, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, type ApplicationCommandOptionAllowedChannelTypes, type ApplicationCommandOptionChoiceData, type BaseApplicationCommandData, type CacheType, type LocalizationMap } from "discord.js";
-import { type ChatInputApplicationCommandData, type MessageApplicationCommandData, type UserApplicationCommandData } from "discord.js";
-import type { NotEmptyArray, UniqueArray } from "./utils.js";
+import { ApplicationCommandOptionType, ApplicationCommandType, AutocompleteInteraction, ChatInputCommandInteraction, InteractionContextType, MessageContextMenuCommandInteraction, UserContextMenuCommandInteraction, type ApplicationCommandOptionAllowedChannelTypes, type ApplicationCommandOptionChoiceData, type BaseApplicationCommandData, type CacheType, type ChatInputApplicationCommandData, type LocalizationMap, type MessageApplicationCommandData, type UserApplicationCommandData } from "discord.js"
+import type { GenericAction } from "../creators/actions/index.js"
+import type { NotEmptyArray, UniqueArray } from "./utils.js"
 
 export type CommandType = 
     | ApplicationCommandType.ChatInput
     | ApplicationCommandType.Message
-    | ApplicationCommandType.User;
+    | ApplicationCommandType.User
 
 type AutocompleData<Type> = Promise<
     | readonly ApplicationCommandOptionChoiceData<
@@ -13,41 +13,41 @@ type AutocompleData<Type> = Promise<
     >[]
     | undefined
     | void
->;
+>
 
 export type AutocompleteRun<Type, Contexts> = (
     this: void,
     interaction: AutocompleteInteraction<CacheMode<Contexts>>
-) => AutocompleData<Type>;
+) => AutocompleData<Type>
 
 interface AutocompleteOptionData<Type, Contexts> {
-    autocomplete?: true | AutocompleteRun<Type, Contexts>;
+    autocomplete?: true | AutocompleteRun<Type, Contexts>
 }
 
 interface BaseOptionData {
-    name: string;
-    nameLocalizations?: LocalizationMap;
-    description?: string;
-    descriptionLocalizations?: LocalizationMap;
-    required?: boolean;
+    name: string
+    nameLocalizations?: LocalizationMap
+    description?: string
+    descriptionLocalizations?: LocalizationMap
+    required?: boolean
 }
 
 interface StringOptionData<Contexts> extends
     BaseOptionData, AutocompleteOptionData<string, Contexts> {
     type: ApplicationCommandOptionType.String,
-    choices?: readonly ApplicationCommandOptionChoiceData<string>[];
-    minLength?: number;
-    maxLength?: number;
+    choices?: readonly ApplicationCommandOptionChoiceData<string>[]
+    minLength?: number
+    maxLength?: number
 }
 
 interface NumberOptionData<Contexts> extends
     BaseOptionData, AutocompleteOptionData<number, Contexts> {
     type:
     | ApplicationCommandOptionType.Number
-    | ApplicationCommandOptionType.Integer;
-    choices?: readonly ApplicationCommandOptionChoiceData<number>[];
-    minValue?: number;
-    maxValue?: number;
+    | ApplicationCommandOptionType.Integer
+    choices?: readonly ApplicationCommandOptionChoiceData<number>[]
+    minValue?: number
+    maxValue?: number
 }
 
 interface ChannelOptionData extends BaseOptionData {
@@ -67,7 +67,7 @@ export type SlashCommandPrimitiveOptionData<Contexts> =
     | StringOptionData<Contexts>
     | NumberOptionData<Contexts>
     | CommonOptionData
-    | ChannelOptionData;
+    | ChannelOptionData
 
 export interface SubCommandOptionData<Contexts> extends Omit<BaseOptionData, "required"> {
     type: ApplicationCommandOptionType.Subcommand,
@@ -85,37 +85,40 @@ type CacheMode<Contexts> = Contexts extends readonly InteractionContextType[]
         [InteractionContextType.BotDM]: CacheType,
         [InteractionContextType.PrivateChannel]: CacheType,
     }[Contexts[number]]
-    : CacheType;
+    : CacheType
 
-interface CommandRunThis {
-    /**
-     * Blocks the flow of executions
-     */
-    block(): never;
+interface CommandBase {
+  block(): never
 }
 
-type ResolveCommandModuleData<Return> = Return extends void ? undefined : Return;
+export type CommandRunThis<Actions> = CommandBase & {
+  [ActionKey in keyof Actions]: Actions[ActionKey] extends { toComponentData: infer ComponentData }
+    ? ComponentData
+    : never
+}
 
-export type SubCommandModuleData<Contexts, Return> =
+type ResolveCommandModuleData<Return> = Return extends void ? undefined : Return
+
+export type SubCommandModuleData<Contexts, Actions, Return> =
     Omit<BaseOptionData, "required"> & {
-        group?: string;
+        group?: string
         run(
-            this: CommandRunThis,
+            this: CommandRunThis<Actions>,
             interaction: ChatInputCommandInteraction<CacheMode<Contexts>>,
             data: ResolveCommandModuleData<Return>
-        ): Promise<void>;
+        ): Promise<void>
         options?: SlashCommandPrimitiveOptionData<Contexts>[]
-    };
+    }
 
-export type SubCommandGroupModuleData<Contexts, Return, T> =
+export type SubCommandGroupModuleData<Contexts, Actions, Return, T> =
     Omit<BaseOptionData, "required"> & {
         options?: Omit<SubCommandOptionData<Contexts>, "type">[]
         run?(
-            this: CommandRunThis,
+            this: CommandRunThis<Actions>,
             interaction: ChatInputCommandInteraction<CacheMode<Contexts>>,
             data: ResolveCommandModuleData<Return>
-        ): Promise<T>;
-    };
+        ): Promise<T>
+    }
 
 type RunInteraction<T, Contexts> =
     T extends ApplicationCommandType.Message
@@ -128,17 +131,18 @@ type BaseAppCommandData =
     & Omit<BaseApplicationCommandData, "contexts">
     & Pick<BaseOptionData, "descriptionLocalizations">
 
-export interface CommandData<T, Contexts, R> extends BaseAppCommandData {
-    name: string;
-    description?: string;
+export interface CommandData<T, Contexts, Actions extends Record<string, GenericAction>, R> extends BaseAppCommandData {
+    name: string
+    description?: string
     contexts?: NotEmptyArray<UniqueArray<Contexts>>
-    type?: T;
-    global?: boolean;
-    run?(this: CommandRunThis, interaction: RunInteraction<T, Contexts>): Promise<R>;
-    autocomplete?: AutocompleteRun<string | number, Contexts>;
+    type?: T
+    actions: Actions
+    global?: boolean
+    run?(this: CommandRunThis<Actions>, interaction: RunInteraction<T, Contexts>): Promise<R>
+    autocomplete?: AutocompleteRun<string | number, Contexts>
     options?:
     | SlashCommandPrimitiveOptionData<Contexts>[]
-    | (GroupOptionData<Contexts> | SubCommandOptionData<Contexts>)[];
+    | (GroupOptionData<Contexts> | SubCommandOptionData<Contexts>)[]
 }
 
 export type SlashCommandOptionData<Contexts> =
@@ -147,16 +151,16 @@ export type SlashCommandOptionData<Contexts> =
     | SubCommandOptionData<Contexts>
 
 export type CommandModule =
-    | (SubCommandGroupModuleData<unknown, unknown, unknown> & {
+    | (SubCommandGroupModuleData<unknown, unknown, unknown, unknown> & {
         type: ApplicationCommandOptionType.SubcommandGroup
     })
-    | (SubCommandModuleData<unknown, unknown> & {
+    | (SubCommandModuleData<unknown, unknown, unknown> & {
         type: ApplicationCommandOptionType.Subcommand
         group?: string
-    });
+    })
 
 export type BuildedCommandData = (
     | UserApplicationCommandData
     | MessageApplicationCommandData
     | ChatInputApplicationCommandData
-) & { global?: boolean };
+) & { global?: boolean }

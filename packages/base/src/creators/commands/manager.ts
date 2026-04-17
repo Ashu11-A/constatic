@@ -4,6 +4,7 @@ import { RunBlockError } from "../../error.js";
 import type { BuildedCommandData, CommandModule, CommandType, SlashCommandOptionData } from "../../types/command.js";
 import { BaseManager } from "../manager.js";
 import type { Command } from "./command.js";
+import type { GenericAction } from "../index.js";
 
 type Runner = Function | null | undefined;
 
@@ -11,10 +12,10 @@ export class CommandManager extends BaseManager {
     private get config() {
         return this.app.config.commands;
     }
-    private readonly collection = new Map<string, Command<unknown, readonly InteractionContextType[], unknown>>();
+    private readonly collection = new Map<string, Command<unknown, readonly InteractionContextType[], Record<string, GenericAction>, unknown>>();
     public readonly runners = new Map<string, Runner[]>();
     public readonly autocompleteRunners = new Map<string, Runner>();
-    public set<T, C extends readonly InteractionContextType[], R>(command: Command<T, C, R>) {
+    public set<T, C extends readonly InteractionContextType[], R>(command: Command<T, C, {}, R>) {
         this.collection.set(command.data.name, command);
         const path = `/${command.data.type}/${command.data.name}`;
         this.runners.set(path, [command.data.run]);
@@ -241,14 +242,21 @@ export class CommandManager extends BaseManager {
             return;
         }
 
+      const command = this.collection.get(interaction.commandName)
         try {
             let result;
+
             for (const run of handler.filter(h => h !== null && h !== undefined)) {
-                result = await run.call({
-                    block() {
-                        throw new RunBlockError();
+              const functions = Object.entries(command?.data.actions ?? {}).flatMap(([key, func]: [string, any]) => ({
+                [key]: "toComponentData" in func ? (...args: any) => func.toComponentData(...args) : func
+              }))
+                result = await run.call(Object.assign({
+                  block() {
+                      throw new RunBlockError();
                     }
-                }, interaction, result);
+                }, ...functions),
+                interaction,
+                result);
             }
         } catch (err) {
             if (err instanceof RunBlockError) return;

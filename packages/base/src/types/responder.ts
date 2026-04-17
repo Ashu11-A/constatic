@@ -43,7 +43,7 @@ export interface ResponderData<
     types: NotEmptyArray<UniqueArray<Types>>,
     cache?: Cache;
     run(
-        this: void,
+        this: ResponderData<Path, Types, Cache>,
         interaction: ResponderInteraction<Types[number], Cache>,
         params: ParsePath<Path>['fragment'] & ParsePath<Path>['params'] & ParsePath<Path>['searchParams']
     ): Promise<void>;

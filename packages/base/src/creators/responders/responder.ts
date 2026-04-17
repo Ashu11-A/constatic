@@ -13,7 +13,7 @@ export class Responder<
     constructor(
         public readonly data: ResponderData<Path, Types, Cache>
     ){
-      ConstaticApp.getInstance().responders.set(this)
       this.ast = new Analyze(this.data.customId)
+      ConstaticApp.getInstance().responders.set(this)
     }
 }
