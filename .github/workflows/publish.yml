@@ -1,0 +1,75 @@
+name: Publish to NPM
+
+on:
+  release:
+    types: [created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to publish (e.g. 1.0.0). If empty, uses package.json version.'
+        required: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: npm-publish
+    defaults:
+      run:
+        working-directory: packages/base
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 'lts/*'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        working-directory: .
+        run: bun install
+
+      - name: Build
+        run: bun run build
+
+      - name: Stage publish directory
+        run: |
+          mkdir -p .publish/esm .publish/types
+
+          cp -r dist/esm/. .publish/esm/
+          cp -r dist/types/. .publish/types/
+          cp tsconfig/base.json .publish/tsconfig.json
+          cp README.md .publish/README.md
+
+          # Resolve version from input, tag, or package.json
+          if [ -n "${{ github.event.inputs.version }}" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          elif [[ "${{ github.ref }}" == refs/tags/* ]]; then
+            TAG_NAME="${GITHUB_REF#refs/tags/}"
+            VERSION="${TAG_NAME#v}"
+          else
+            VERSION="$(jq -r '.version' package.json)"
+          fi
+
+          jq \
+            --arg version "$VERSION" \
+            '
+              .name = "@ashu11a/constatic" |
+              .version = $version |
+              .files = ["esm", "types", "tsconfig.json", "README.md"]
+            ' package.json > .publish/package.json
+
+      - name: Publish as @ashu11a/constatic
+        working-directory: packages/base/.publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish --access public --provenance

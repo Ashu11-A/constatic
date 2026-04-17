@@ -33,12 +33,12 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rinckodev/constatic.git",
+    "url": "git+https://github.com/Ashu11-A/constatic.git",
     "directory": "packages/base"
   },
   "author": {
-    "url": "https://github.com/rinckodev",
-    "name": "Rincko dev"
+    "url": "https://github.com/Ashu11-A",
+    "name": "Ashu"
   },
   "devDependencies": {
     "@constatic/config": "*",
@@ -47,10 +47,10 @@
   },
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./esm/index.js",
+      "types": "./types/index.d.ts"
     },
-    "./tsconfig": "./tsconfig/base.json"
+    "./tsconfig": "./tsconfig.json"
   },
   "files": [
     "dist",
