@@ -3,7 +3,7 @@ import { ResponderType } from "../../types/responder.js";
 import type { RoleSelectData } from "../../types/actions.js";
 import { BaseAction } from "./base.js";
 
-export type GenericRoleSelect = RoleSelect<any, CacheType>
+export type GenericRoleSelect = RoleSelect<any, any>
 
 export class RoleSelect<
     const Parse extends string,

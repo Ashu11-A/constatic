@@ -3,7 +3,7 @@ import { ResponderType } from "../../types/responder.js";
 import type { ChannelSelectData } from "../../types/actions.js";
 import { BaseAction } from "./base.js";
 
-export type GenericChannelSelect = ChannelSelect<any, CacheType>
+export type GenericChannelSelect = ChannelSelect<any, any>
 
 export class ChannelSelect<
     const Parse extends string,

@@ -120,7 +120,7 @@ export type SubCommandGroupModuleData<Contexts, Actions, Return, T> =
         ): Promise<T>
     }
 
-type RunInteraction<T, Contexts> =
+export type RunInteraction<T, Contexts> =
     T extends ApplicationCommandType.Message
     ? MessageContextMenuCommandInteraction<CacheMode<Contexts>> :
     T extends ApplicationCommandType.User
@@ -136,7 +136,7 @@ export interface CommandData<T, Contexts, Actions extends Record<string, Generic
     description?: string
     contexts?: NotEmptyArray<UniqueArray<Contexts>>
     type?: T
-    actions: Actions
+    actions?: Actions
     global?: boolean
     run?(this: CommandRunThis<Actions>, interaction: RunInteraction<T, Contexts>): Promise<R>
     autocomplete?: AutocompleteRun<string | number, Contexts>

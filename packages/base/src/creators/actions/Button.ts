@@ -3,7 +3,7 @@ import { ResponderType } from "../../types/responder.js";
 import type { ButtonData } from "../../types/actions.js";
 import { BaseAction } from "./base.js";
 
-export type GenericButton = Button<any, CacheType>
+export type GenericButton = Button<any, any>
 
 export class Button<
     const Parse extends string,

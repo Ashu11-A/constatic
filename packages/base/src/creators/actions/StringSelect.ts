@@ -3,7 +3,7 @@ import { ResponderType } from "../../types/responder.js";
 import type { StringSelectData } from "../../types/actions.js";
 import { BaseAction } from "./base.js";
 
-export type GenericStringSelect = StringSelect<any, CacheType>
+export type GenericStringSelect = StringSelect<any, any>
 
 export class StringSelect<
     const Parse extends string,

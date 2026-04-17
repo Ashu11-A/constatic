@@ -3,7 +3,7 @@ import { ResponderType } from "../../types/responder.js";
 import type { MentionableSelectData } from "../../types/actions.js";
 import { BaseAction } from "./base.js";
 
-export type GenericMentionableSelect = MentionableSelect<any, CacheType>
+export type GenericMentionableSelect = MentionableSelect<any, any>
 
 export class MentionableSelect<
     const Parse extends string,

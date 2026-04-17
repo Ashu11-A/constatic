@@ -18,7 +18,11 @@ export class CommandManager extends BaseManager {
     public set<T, C extends readonly InteractionContextType[], R>(command: Command<T, C, {}, R>) {
         this.collection.set(command.data.name, command);
         const path = `/${command.data.type}/${command.data.name}`;
-        this.runners.set(path, [command.data.run]);
+        this.runners.set(path, [
+            function(this: unknown, ...args: unknown[]) {
+                return (command.data.run as ((...a: unknown[]) => unknown) | undefined)?.call(this, ...args);
+            }
+        ]);
 
         if (command.data.autocomplete) {
             this.autocompleteRunners.set(path, command.data.autocomplete);

@@ -3,7 +3,7 @@ import { ResponderType } from "../../types/responder.js";
 import type { ModalComponentActionData } from "../../types/actions.js";
 import { BaseAction } from "./base.js";
 
-export type GenericModalComponent = ModalComponent<any, CacheType>
+export type GenericModalComponent = ModalComponent<any, any>
 
 export class ModalComponent<
     const Parse extends string,

@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionType, ApplicationCommandType, InteractionContextType } from "discord.js";
 import { Analyze } from "url-ast";
 import { ConstaticApp } from "../../app.js";
-import type { CommandData, CommandModule, SubCommandGroupModuleData, SubCommandModuleData } from "../../types/command.js";
+import type { CommandData, CommandModule, CommandRunThis, RunInteraction, SubCommandGroupModuleData, SubCommandModuleData } from "../../types/command.js";
 import { type GenericAction } from "../actions/index.js";
 import { Responder } from "../responders/responder.js";
 
@@ -35,21 +35,26 @@ export class Command<
         public readonly data: CommandData<Type, Contexts, Actions, Return>
     ) {
         this.data.type ??= <Type>ApplicationCommandType.ChatInput
+
         if (this.data.type === ApplicationCommandType.ChatInput) {
             this.data.description ??= this.data.name;
             this.data.name = this.data.name
                 .toLowerCase()
                 .replaceAll(" ", "");
         }
+
         if (this.data.name.length > 32) {
             this.data.name = this.data.name.slice(0, 32);
         }
+        
         if (!this.data.contexts){
             Object.assign(this.data, {
                 contexts: [InteractionContextType.Guild]
             });
         }
-        
+
+        this.data.actions ??= <Actions>{}
+
         for (const key in this.data.actions) {
           const action = this.data.actions[key]
           const ast = new Analyze(`/${this.data.name}${action.options.parser}`)
@@ -66,6 +71,7 @@ export class Command<
 
         ConstaticApp.getInstance().commands.set(this);
     }
+
     public group<ModuleReturn = Return>(data: SubCommandGroupModuleData<Contexts, Actions, Return, ModuleReturn>) {
         this.modules.push({
             ...data,
@@ -75,11 +81,36 @@ export class Command<
             this, data
         );
     }
+
     public subcommand<R = Return>(data: SubCommandModuleData<Contexts, Actions, R>) {
         this.modules.push({
             ...data,
             type: ApplicationCommandOptionType.Subcommand
         });
         return this;
+    }
+
+    public action<const K extends string, const A extends GenericAction>(
+        name: K,
+        action: A
+    ): Command<Type, Contexts, Actions & Record<K, A>, Return> {
+        const ast = new Analyze(`/${this.data.name}${action.options.parser}`)
+        action.ast = ast
+
+        new Responder({
+            customId: ast.getPathname(),
+            types: [action.type],
+            run: action.run as any,
+            cache: action.options.cache
+        });
+
+        (this.data.actions as Record<string, GenericAction>)[name] = action
+
+        return this as any
+    }
+
+    public run(fn: (this: CommandRunThis<Actions>, interaction: RunInteraction<Type, Contexts>) => Promise<Return>): this {
+        this.data.run = fn
+        return this
     }
 }
