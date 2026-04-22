@@ -28,12 +28,16 @@ export class CommandManager extends BaseManager {
             this.autocompleteRunners.set(path, command.data.autocomplete);
         }
 
-        const [icon, label] = this.getTitle(<CommandType>command.data.type);
+        const type = command.data.type as CommandType;
+
+        const [icon, label] = this.getTitle(type);
 
         this.logs.push([
             styleText("green", `${icon} ${label}`),
             styleText("gray", `>`),
-            styleText(["blue", "underline"], command.data.name),
+            styleText(["blue", "underline"], (
+                type === ApplicationCommandType.ChatInput ? "/" : ""
+            ) + command.data.name),
             styleText("green", "✓"),
         ].join(" "));
     }
@@ -283,8 +287,8 @@ export class CommandManager extends BaseManager {
             const guildScopedCommands: BuildedCommandData[] = [];
             const globalCommands: BuildedCommandData[] = [];
 
-            for(const command of commands){
-                if (command.global){
+            for (const command of commands) {
+                if (command.global) {
                     globalCommands.push(command)
                 } else {
                     guildScopedCommands.push(command);
