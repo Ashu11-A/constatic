@@ -1,6 +1,7 @@
 import { Client, Collection, type ClientEvents } from "discord.js";
 import type { ClientEventKey, EventPropData, EventsCollection, GenericEventArgs } from "../../types/event.js";
 import { BaseManager } from "../manager.js";
+import { styleText } from "node:util";
 import type { Event } from "./event.js";
 
 export class EventManager extends BaseManager {
@@ -17,6 +18,15 @@ export class EventManager extends BaseManager {
     public add(event: Event<ClientEventKey>) {
         const events = this.getEvents(event.data.event);
         events.set(event.data.name, event);
+
+        this.logs.push([
+            styleText("yellow", `✦ Event`),
+            styleText("gray", `>`),
+            styleText(["yellow"], event.data.event),
+            styleText("gray", `>`),
+            styleText(["blue", "underline"], event.data.name),
+            styleText("green", "✓"),
+        ].join(" "));
     }
     public async onEvent(event: Event<ClientEventKey>, args: GenericEventArgs) {
         const { middleware, onError } = this.config;

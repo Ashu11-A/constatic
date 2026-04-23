@@ -4,8 +4,9 @@ import { changelog } from "@/lib/source";
 import Link from "next/link";
 import { MdOutlineUpdate } from "react-icons/md";
 
-export default async function Page({}: PageProps<"/[lang]/changelog">) {
-    const posts = changelog.getPages()
+export default async function Page({ params }: PageProps<"/[lang]/changelog">) {
+    const { lang } = await params;
+    const posts = changelog.getPages(lang)
         .sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
 
     return <main className="flex justify-center gap-2 p-4">
